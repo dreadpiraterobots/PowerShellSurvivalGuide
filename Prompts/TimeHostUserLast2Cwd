@@ -1,0 +1,45 @@
+function Prompt {
+  $time = (Get-Date).ToString("hh:mm")
+  $user = $(Get-WMIObject -class Win32_ComputerSystem | select username).username
+  $cwd  = (Get-Location) | Convert-Path
+
+  # Get the drive letter or other qualifier
+  $cwdr = (Get-Location) | Split-Path -Qualifier
+
+  # Split the path on backslash; if there's a way of doing this properly, e.g. with Split-Path, I couldn't find it
+  # We're going to show the two lowest elements of the path (assuming there are at least two)
+  # e.g. for C:\Users\Adam\PowerShell the prompt will show "Adam\PowerShell"
+  $cwda = $cwd.split("\")
+  $cwd2 = $cwda[-2]
+  $cwd1 = $cwda[-1]
+
+  # The Prompt function must return an object. As a best practice, return a string or an object that is formatted as a string. The maximum recommended length is 80 characters.
+  # See https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_prompts?view=powershell-7.2
+
+  # So, we output the prompt using Write-Host because:
+  # 1. the way PowerShell expands sub-expressions is strange and upsetting
+  # 2. this avoids the length limitation of the Prompt return
+
+  # Time
+  Write-Host "[" -NoNewline
+  Write-Host $time -NoNewline -BackgroundColor Black -ForegroundColor Yellow
+  Write-Host "][" -NoNewLine
+  
+  # User
+  Write-Host $user -NoNewline -ForegroundColor Gray
+  Write-Host "][" -NoNewLine
+  
+  # Qualifier (e.g. drive letter)
+  Write-Host $cwdr -NoNewline -ForegroundColor Gray
+  Write-Host "|" -NoNewLine
+  
+  # Last two elements of the current working directory path
+  Write-Host $cwd2 -NoNewline -ForegroundColor Gray
+  Write-Host "\" -NoNewLine
+  # Highlight the last element a bit
+  Write-Host $cwd1 -NoNewline -BackgroundColor Blue -ForegroundColor Cyan
+  Write-Host "]>" -NoNewLine
+
+  # Prompt must return something
+  " "
+}
